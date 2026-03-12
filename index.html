@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stambi - スタンプ旅行アプリ</title>
+<meta name="description" content="Stambi（スタンビ）は、実際にその場所を訪れてスタンプを集める旅行記録アプリです。">
+<style>
+  :root {
+    --primary: #667eea;
+    --primary2: #764ba2;
+    --dark: #0f1117;
+    --card: #1a1d2e;
+    --text: #e2e8f0;
+    --sub: #94a3b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', 'Segoe UI', sans-serif; background: var(--dark); color: var(--text); overflow-x: hidden; }
+
+  /* NAV */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px 40px; display: flex; align-items: center; justify-content: space-between; background: rgba(15,17,23,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 800; color: #fff; text-decoration: none; }
+  .nav-logo img { width: 36px; height: 36px; border-radius: 9px; }
+  .lang-switcher { display: flex; gap: 6px; }
+  .lang-btn { padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: var(--sub); font-size: 13px; cursor: pointer; transition: all .2s; }
+  .lang-btn.active, .lang-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+  /* HERO */
+  .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 120px 24px 80px; position: relative; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(102,126,234,0.18) 0%, transparent 70%); pointer-events: none; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(102,126,234,0.15); border: 1px solid rgba(102,126,234,0.3); border-radius: 20px; padding: 6px 16px; font-size: 13px; color: #a5b4fc; margin-bottom: 28px; }
+  .hero h1 { font-size: clamp(42px, 8vw, 80px); font-weight: 900; line-height: 1.1; margin-bottom: 20px; background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero-sub { font-size: clamp(16px, 2.5vw, 22px); color: var(--sub); max-width: 600px; margin: 0 auto 48px; line-height: 1.7; }
+  .hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 64px; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--primary), var(--primary2)); color: white; padding: 16px 32px; border-radius: 50px; font-size: 16px; font-weight: 700; text-decoration: none; transition: transform .2s, box-shadow .2s; box-shadow: 0 8px 32px rgba(102,126,234,0.35); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(102,126,234,0.5); }
+  .btn-primary.coming-soon { opacity: 0.6; cursor: default; pointer-events: none; }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.08); color: white; padding: 16px 32px; border-radius: 50px; font-size: 16px; font-weight: 600; text-decoration: none; border: 1px solid rgba(255,255,255,0.12); transition: all .2s; }
+  .btn-secondary:hover { background: rgba(255,255,255,0.14); }
+  .hero-mockup { position: relative; display: inline-block; }
+  .hero-mockup img { width: min(280px, 70vw); border-radius: 36px; box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06); }
+  .glow { position: absolute; inset: -20%; background: radial-gradient(ellipse, rgba(102,126,234,0.25) 0%, transparent 70%); pointer-events: none; z-index: -1; }
+
+  /* FEATURES */
+  .section { padding: 100px 24px; }
+  .section-title { text-align: center; font-size: clamp(28px, 5vw, 44px); font-weight: 900; margin-bottom: 16px; }
+  .section-sub { text-align: center; color: var(--sub); font-size: 17px; max-width: 520px; margin: 0 auto 64px; line-height: 1.7; }
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1100px; margin: 0 auto; }
+  .feature-card { background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 32px; transition: transform .2s, border-color .2s; }
+  .feature-card:hover { transform: translateY(-4px); border-color: rgba(102,126,234,0.4); }
+  .feature-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 20px; }
+  .feature-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .feature-card p { font-size: 14px; color: var(--sub); line-height: 1.7; }
+
+  /* SCREENSHOTS */
+  .screenshots { padding: 100px 24px; background: linear-gradient(180deg, transparent, rgba(102,126,234,0.04) 50%, transparent); }
+  .screenshots-scroll { display: flex; gap: 20px; overflow-x: auto; padding: 20px 40px 40px; scrollbar-width: none; max-width: 1200px; margin: 0 auto; justify-content: center; flex-wrap: wrap; }
+  .screenshots-scroll::-webkit-scrollbar { display: none; }
+  .screenshot-item { flex-shrink: 0; text-align: center; }
+  .screenshot-item img { width: 200px; border-radius: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06); transition: transform .3s; }
+  .screenshot-item img:hover { transform: translateY(-8px) scale(1.02); }
+  .screenshot-item p { margin-top: 14px; font-size: 13px; color: var(--sub); }
+
+  /* STATS */
+  .stats { padding: 80px 24px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; max-width: 800px; margin: 0 auto; text-align: center; }
+  .stat-item { background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 28px 20px; }
+  .stat-num { font-size: 40px; font-weight: 900; background: linear-gradient(135deg, var(--primary), var(--primary2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .stat-label { font-size: 13px; color: var(--sub); margin-top: 6px; }
+
+  /* DOWNLOAD */
+  .download { padding: 100px 24px; text-align: center; }
+  .download-card { background: linear-gradient(135deg, rgba(102,126,234,0.15), rgba(118,75,162,0.15)); border: 1px solid rgba(102,126,234,0.25); border-radius: 28px; padding: 64px 40px; max-width: 700px; margin: 0 auto; }
+  .download-card h2 { font-size: clamp(28px, 5vw, 42px); font-weight: 900; margin-bottom: 16px; }
+  .download-card p { color: var(--sub); font-size: 17px; margin-bottom: 40px; line-height: 1.7; }
+  .coming-soon-badge { display: inline-block; background: rgba(102,126,234,0.2); border: 1px solid rgba(102,126,234,0.4); color: #a5b4fc; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 24px; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 40px 24px; text-align: center; color: var(--sub); font-size: 14px; }
+  footer a { color: var(--sub); text-decoration: none; margin: 0 12px; }
+  footer a:hover { color: var(--primary); }
+  .footer-logo { font-size: 22px; font-weight: 900; color: white; margin-bottom: 16px; }
+
+  /* LANG SECTIONS */
+  .lang-content { display: none; }
+  .lang-content.active { display: block; }
+
+  @media (max-width: 600px) {
+    nav { padding: 14px 20px; }
+    .hero-btns { flex-direction: column; align-items: center; }
+    .download-card { padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <img src="icon.png" alt="Stambi" onerror="this.style.display='none'">
+    Stambi
+  </a>
+  <div class="lang-switcher">
+    <button class="lang-btn active" onclick="switchLang('ja')">日本語</button>
+    <button class="lang-btn" onclick="switchLang('zh')">中文</button>
+    <button class="lang-btn" onclick="switchLang('en')">English</button>
+  </div>
+</nav>
+
+<!-- ====== 日本語 ====== -->
+<div class="lang-content active" id="lang-ja">
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div>
+      <div class="hero-badge">🗾 日本全国 237スポット対応</div>
+      <h1>旅して、集めて、<br>日本を制覇しよう</h1>
+      <p class="hero-sub">Stambiは、実際にその場所を訪れてスタンプを集める新感覚の旅行記録アプリ。47都道府県を巡り、あなただけの旅の軌跡を刻もう。</p>
+      <div class="hero-btns">
+        <a href="#download" class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          App Storeでダウンロード
+        </a>
+        <a href="#features" class="btn-secondary">機能を見る ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-num">237+</div><div class="stat-label">全国スポット</div></div>
+      <div class="stat-item"><div class="stat-num">47</div><div class="stat-label">都道府県対応</div></div>
+      <div class="stat-item"><div class="stat-num">15+</div><div class="stat-label">コレクション図鑑</div></div>
+      <div class="stat-item"><div class="stat-num">300m</div><div class="stat-label">チェックイン範囲</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <h2 class="section-title">Stambiでできること</h2>
+    <p class="section-sub">スタンプを集めながら、日本の魅力を再発見しよう</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(102,126,234,0.15)">🗺️</div>
+        <h3>マップでスポットを探す</h3>
+        <p>全国の観光地・神社・絶景・グルメスポットがマップ上に表示。気になる場所を見つけて足を運ぼう。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(236,72,153,0.15)">📍</div>
+        <h3>現地チェックインでスタンプ取得</h3>
+        <p>スポットから300m以内に近づくとチェックイン可能。その場所に「行った」証が、あなただけのスタンプになる。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(245,158,11,0.15)">🏆</div>
+        <h3>コレクションを完成させよう</h3>
+        <p>「日本三景」「東京名所」など、テーマ別コレクション。全スタンプを集めると特別な称号バッジを獲得。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(16,185,129,0.15)">🗾</div>
+        <h3>47都道府県制覇マップ</h3>
+        <p>訪れた都道府県が地図上でカラーリング。日本全国を制覇する達成感をぜひ味わって。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(139,92,246,0.15)">🎖️</div>
+        <h3>称号バッジシステム</h3>
+        <p>「京都初探」「世界遺産収蔵家」など旅スタイルに合わせた称号を獲得。プロフィールに最大5つ表示できる。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(59,130,246,0.15)">🌏</div>
+        <h3>多言語対応</h3>
+        <p>日本語・中文・Englishに対応。日本に住む方にも、旅行で訪れる方にも使いやすい設計。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="screenshots" id="screenshots">
+    <h2 class="section-title">スクリーンショット</h2>
+    <p class="section-sub">シンプルで直感的なデザイン</p>
+    <div class="screenshots-scroll">
+      <div class="screenshot-item"><img src="screenshots/ss1.jpg" alt="マップ" onerror="this.parentElement.style.display='none'"><p>探索マップ</p></div>
+      <div class="screenshot-item"><img src="screenshots/ss2.jpg" alt="チェックイン" onerror="this.parentElement.style.display='none'"><p>チェックイン</p></div>
+      <div class="screenshot-item"><img src="screenshots/ss3.jpg" alt="コレクション" onerror="this.parentElement.style.display='none'"><p>スタンプ収集</p></div>
+      <div class="screenshot-item"><img src="screenshots/ss4.jpg" alt="制覇マップ" onerror="this.parentElement.style.display='none'"><p>47都道府県マップ</p></div>
+      <div class="screenshot-item"><img src="screenshots/ss5.jpg" alt="プロフィール" onerror="this.parentElement.style.display='none'"><p>マイページ</p></div>
+    </div>
+  </section>
+
+  <section class="download" id="download">
+    <div class="download-card">
+      <div class="coming-soon-badge">🚀 まもなく配信開始</div>
+      <h2>さあ、旅を始めよう</h2>
+      <p>Stambiは現在App Storeの審査中です。<br>もうすぐダウンロードできるようになります。</p>
+      <a href="#" class="btn-primary coming-soon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        App Storeでダウンロード（準備中）
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<!-- ====== 中文 ====== -->
+<div class="lang-content" id="lang-zh">
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div>
+      <div class="hero-badge">🗾 全国 237 个景点</div>
+      <h1>旅行打卡，<br>收集印章，征服日本</h1>
+      <p class="hero-sub">Stambi 是一款地图打卡与印章收集旅行应用，帮助你探索日本各地景点，记录每一次旅行的足迹。</p>
+      <div class="hero-btns">
+        <a href="#download-zh" class="btn-primary coming-soon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          App Store 下载（即将上线）
+        </a>
+        <a href="#features-zh" class="btn-secondary">了解功能 ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-num">237+</div><div class="stat-label">全国景点</div></div>
+      <div class="stat-item"><div class="stat-num">47</div><div class="stat-label">都道府县</div></div>
+      <div class="stat-item"><div class="stat-num">15+</div><div class="stat-label">收藏图鉴</div></div>
+      <div class="stat-item"><div class="stat-num">300m</div><div class="stat-label">打卡范围</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="features-zh">
+    <h2 class="section-title">Stambi 能做什么</h2>
+    <p class="section-sub">边旅行边收集印章，重新发现日本之美</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(102,126,234,0.15)">🗺️</div>
+        <h3>地图探索景点</h3>
+        <p>全国神社、绝景、美食、建筑等景点全在地图上显示，找到感兴趣的地方直接导航前往。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(236,72,153,0.15)">📍</div>
+        <h3>到达现场解锁印章</h3>
+        <p>距离景点 300 米以内即可打卡，每一枚印章都是你真实到访的证明。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(245,158,11,0.15)">🏆</div>
+        <h3>收集图鉴系列</h3>
+        <p>「日本三景」「东京打卡地」「京都名所」等主题系列，集齐全套解锁特别称号徽章。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(16,185,129,0.15)">🗾</div>
+        <h3>47 都道府县征服地图</h3>
+        <p>走过的都道府县在地图上逐渐上色，一眼看出你的日本旅行足迹。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(139,92,246,0.15)">🎖️</div>
+        <h3>称号徽章系统</h3>
+        <p>解锁「京都初探者」「世界遗产收藏家」等称号，最多展示 5 枚在个人页面。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(59,130,246,0.15)">🌏</div>
+        <h3>多语言支持</h3>
+        <p>支持中文、日文、英文切换，无论是旅游还是定居日本，都能顺畅使用。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="download" id="download-zh">
+    <div class="download-card">
+      <div class="coming-soon-badge">🚀 即将上线</div>
+      <h2>开始你的日本之旅</h2>
+      <p>Stambi 正在 App Store 审核中，<br>即将与大家见面！</p>
+      <a href="#" class="btn-primary coming-soon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        App Store 下载（准备中）
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<!-- ====== English ====== -->
+<div class="lang-content" id="lang-en">
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div>
+      <div class="hero-badge">🗾 237+ Spots Across Japan</div>
+      <h1>Travel Japan,<br>Collect Stamps,<br>Conquer All 47 Prefectures</h1>
+      <p class="hero-sub">Stambi is a map-based stamp collection app where you visit real locations to earn stamps and build your travel legacy across Japan.</p>
+      <div class="hero-btns">
+        <a href="#download-en" class="btn-primary coming-soon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Download on App Store (Coming Soon)
+        </a>
+        <a href="#features-en" class="btn-secondary">See Features ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-num">237+</div><div class="stat-label">Spots Nationwide</div></div>
+      <div class="stat-item"><div class="stat-num">47</div><div class="stat-label">Prefectures</div></div>
+      <div class="stat-item"><div class="stat-num">15+</div><div class="stat-label">Collections</div></div>
+      <div class="stat-item"><div class="stat-num">300m</div><div class="stat-label">Check-in Range</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="features-en">
+    <h2 class="section-title">What You Can Do</h2>
+    <p class="section-sub">Discover Japan one stamp at a time</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(102,126,234,0.15)">🗺️</div>
+        <h3>Explore on the Map</h3>
+        <p>Browse shrines, scenic spots, food spots, and landmarks across Japan on an interactive map.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(236,72,153,0.15)">📍</div>
+        <h3>Check In to Earn Stamps</h3>
+        <p>Get within 300 meters of a spot to check in. Each stamp is proof that you were really there.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(245,158,11,0.15)">🏆</div>
+        <h3>Complete Collections</h3>
+        <p>"Three Views of Japan", "Tokyo Highlights", "Kyoto Classics" and more. Complete them all for exclusive badges.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(16,185,129,0.15)">🗾</div>
+        <h3>47 Prefectures Conquest Map</h3>
+        <p>Color in each prefecture as you visit. Watch your map of Japan come to life.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(139,92,246,0.15)">🎖️</div>
+        <h3>Title Badge System</h3>
+        <p>Earn badges like "Kyoto Explorer" and "World Heritage Collector". Display up to 5 on your profile.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(59,130,246,0.15)">🌏</div>
+        <h3>Multilingual Support</h3>
+        <p>Available in Japanese, Chinese, and English — perfect for both residents and visitors to Japan.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="download" id="download-en">
+    <div class="download-card">
+      <div class="coming-soon-badge">🚀 Coming Soon</div>
+      <h2>Start Your Japan Adventure</h2>
+      <p>Stambi is currently under App Store review.<br>Download will be available very soon!</p>
+      <a href="#" class="btn-primary coming-soon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Download on App Store (Coming Soon)
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER (共通) -->
+<footer>
+  <div class="footer-logo">🗾 Stambi</div>
+  <div>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="mailto:privacy@stambi.app">Contact</a>
+  </div>
+  <p style="margin-top:16px;font-size:12px">© 2026 Stambi. All rights reserved.</p>
+</footer>
+
+<script>
+function switchLang(lang) {
+  document.querySelectorAll('.lang-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('lang-' + lang).classList.add('active');
+  event.target.classList.add('active');
+  document.documentElement.lang = lang === 'zh' ? 'zh' : lang === 'en' ? 'en' : 'ja';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</body>
+</html>
